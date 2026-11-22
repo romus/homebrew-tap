@@ -1,0 +1,92 @@
+name: Bump a package in romus/homebrew-tap
+description: Open a pull request in the tap that adds or updates one formula or cask.
+
+inputs:
+  token:
+    description: Token with Contents and Pull requests write access to the tap (the HOMEBREW_TAP_PAT secret).
+    required: true
+  name:
+    description: Formula or cask name. It is also the file name, e.g. writeless → Casks/writeless.rb.
+    required: true
+  version:
+    description: Released version, without the leading v.
+    required: true
+  file:
+    description: Path to the rendered .rb file.
+    required: true
+  type:
+    description: formula or cask.
+    required: false
+    default: formula
+  tap:
+    description: Tap repository.
+    required: false
+    default: romus/homebrew-tap
+  base:
+    description: Branch of the tap to open the pull request against.
+    required: false
+    default: main
+  body:
+    description: Extra Markdown for the pull request description.
+    required: false
+    default: ""
+
+outputs:
+  pull-request-url:
+    description: URL of the pull request, empty when nothing changed.
+    value: ${{ steps.pr.outputs.pull-request-url }}
+  pull-request-operation:
+    description: created, updated, closed or none.
+    value: ${{ steps.pr.outputs.pull-request-operation }}
+
+runs:
+  using: composite
+  steps:
+    - name: Check the token
+      shell: bash
+      env:
+        TOKEN: ${{ inputs.token }}
+      run: |
+        if [ -z "$TOKEN" ]; then
+          echo "::error::The token input is empty. Add the HOMEBREW_TAP_PAT secret to this repository." >&2
+          exit 1
+        fi
+
+    - name: Check out the tap
+      uses: actions/checkout@v4
+      with:
+        repository: ${{ inputs.tap }}
+        token: ${{ inputs.token }}
+        ref: ${{ inputs.base }}
+        path: .homebrew-tap
+
+    - name: Copy the ${{ inputs.type }} into the tap
+      id: prepare
+      shell: bash
+      env:
+        TYPE: ${{ inputs.type }}
+        NAME: ${{ inputs.name }}
+        VERSION: ${{ inputs.version }}
+        FILE: ${{ inputs.file }}
+        TAP_DIR: .homebrew-tap
+      run: bash "$GITHUB_ACTION_PATH/prepare.sh"
+
+    - name: Open a pull request in the tap
+      id: pr
+      uses: peter-evans/create-pull-request@v7
+      with:
+        token: ${{ inputs.token }}
+        path: .homebrew-tap
+        base: ${{ inputs.base }}
+        branch: release/${{ inputs.name }}-v${{ inputs.version }}
+        delete-branch: true
+        add-paths: ${{ steps.prepare.outputs.path }}
+        commit-message: "chore: update ${{ inputs.name }} ${{ inputs.type }} to v${{ inputs.version }}"
+        title: "chore: update ${{ inputs.name }} ${{ inputs.type }} to v${{ inputs.version }}"
+        body: |
+          Update `${{ inputs.name }}` to v${{ inputs.version }}.
+
+          ${{ inputs.body }}
+
+          ---
+          Opened by ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
