@@ -1,8 +1,8 @@
 class Space < Formula
   desc "See what takes up your Mac's disk, and clean it safely, from the terminal"
   homepage "https://github.com/romus/space"
-  url "https://github.com/romus/space/releases/download/v0.1.1/space-0.1.1-macos-universal.tar.gz"
-  sha256 "b14dbb50ecb5f882c0b9107e6c378c3617a700c1ac628a6d6a90e8067ed5328b"
+  url "https://github.com/romus/space/releases/download/v0.1.2/space-0.1.2-macos-universal.tar.gz"
+  sha256 "d327cc1b0759968f7503239603e3c55a8dba8bcbaaccfeb5bb9dfdc62c4f2a74"
   license "MIT"
 
   depends_on :macos
