@@ -19,6 +19,7 @@ hence `brew trust`. To trust one package instead of the whole tap, run
 | Package | Type | Install | Source |
 | --- | --- | --- | --- |
 | `writeless` | cask | `brew install --cask writeless` | [romus/writeless-macos](https://github.com/romus/writeless-macos) |
+| `space` | formula | `brew install space` | [romus/space](https://github.com/romus/space) |
 
 ```bash
 brew upgrade --cask writeless     # upgrade
